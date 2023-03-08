@@ -19,6 +19,7 @@
 // Standard includes.
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <omp.h>
 #include <math.h>
 #include <time.h>
@@ -72,7 +73,7 @@ void invertStack()
 {
 	int half = ceil(stackSize / 2);
 	int i;
-#pragma omp parallel for private(i)
+#pragma omp parallel for
 	for (i = 0; i < half; i++)
 	{
 		int tmp = stack[i];
@@ -86,15 +87,16 @@ void rotateStack(int depth)
 {
 	int i, temp = stack[stackSize - depth];
 	int pos;
-	// #pragma omp parallel for private(i) private(pos) private(temp)
+	int *copy = (int *)malloc(sizeof(int) * stackSize);
+	memcpy(copy, stack, sizeof(int) * stackSize);
+#pragma omp parallel for
 	for (i = 0; i < depth - 1; i++)
 	{
 		pos = stackSize - depth + i;
-		// #pragma omp atomic write
-		stack[pos] = stack[pos + 1];
+		stack[pos] = copy[pos + 1];
 	}
-	// #pragma omp atomic write
 	stack[stackSize - 1] = temp;
+	free(copy);
 }
 
 //
