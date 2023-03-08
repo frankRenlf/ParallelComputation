@@ -1,0 +1,2 @@
+gcc -fopenmp -Wall -o cwk1 cwk1.c
+cwk1 20 10 5 0 0
