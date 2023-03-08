@@ -85,11 +85,15 @@ void invertStack()
 void rotateStack(int depth)
 {
 	int i, temp = stack[stackSize - depth];
-#pragma omp parallel for private(i) private(temp)
+	int pos;
+	// #pragma omp parallel for private(i) private(pos) private(temp)
 	for (i = 0; i < depth - 1; i++)
 	{
-		stack[stackSize - depth + i] = stack[stackSize - depth + i + 1];
+		pos = stackSize - depth + i;
+		// #pragma omp atomic write
+		stack[pos] = stack[pos + 1];
 	}
+	// #pragma omp atomic write
 	stack[stackSize - 1] = temp;
 }
 
