@@ -99,10 +99,12 @@ void rotateStack(int depth)
 	// 	{
 	// 		pos = stackSize - depth + i;
 	// 		int val = 0;
-	// #pragma omp critical
+	// 		if (val == 0)
 	// 		{
+	// #pragma omp barrier
 	// 			val = stack[pos + 1];
 	// 		}
+
 	// 		stack[pos] = val;
 	// 	}
 	stack[stackSize - 1] = temp;
