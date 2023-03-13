@@ -95,6 +95,16 @@ void rotateStack(int depth)
 		pos = stackSize - depth + i;
 		stack[pos] = copy[pos + 1];
 	}
+	// 	for (i = 0; i < depth - 1; i++)
+	// 	{
+	// 		pos = stackSize - depth + i;
+	// 		int val = 0;
+	// #pragma omp critical
+	// 		{
+	// 			val = stack[pos + 1];
+	// 		}
+	// 		stack[pos] = val;
+	// 	}
 	stack[stackSize - 1] = temp;
 	free(copy);
 }
