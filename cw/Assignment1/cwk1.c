@@ -71,7 +71,7 @@ void popFromStack()
 // Inverts the stack in-place; that is, the order of all elements is reversed.
 void invertStack()
 {
-	int half = ceil(stackSize / 2);
+	int half = stackSize / 2;
 	int i;
 #pragma omp parallel for
 	for (i = 0; i < half; i++)
