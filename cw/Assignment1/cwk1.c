@@ -77,7 +77,9 @@ void invertStack()
 	for (i = 0; i < half; i++)
 	{
 		int tmp = stack[i];
+#pragma omp atomic write
 		stack[i] = stack[stackSize - i - 1];
+#pragma omp atomic write
 		stack[stackSize - i - 1] = tmp;
 	}
 }
@@ -92,21 +94,12 @@ void rotateStack(int depth)
 #pragma omp parallel for
 	for (i = 0; i < depth - 1; i++)
 	{
-		pos = stackSize - depth + i;
-		stack[pos] = copy[pos + 1];
+#pragma omp critical(inner)
+		{
+			pos = stackSize - depth + i;
+			stack[pos] = copy[pos + 1];
+		}
 	}
-	// 	for (i = 0; i < depth - 1; i++)
-	// 	{
-	// 		pos = stackSize - depth + i;
-	// 		int val = 0;
-	// 		if (val == 0)
-	// 		{
-	// #pragma omp barrier
-	// 			val = stack[pos + 1];
-	// 		}
-
-	// 		stack[pos] = val;
-	// 	}
 	stack[stackSize - 1] = temp;
 	free(copy);
 }
@@ -141,7 +134,7 @@ int main(int argc, char **argv)
 		initStackSize = maxStackSize;
 	}
 	omp_set_num_threads(4);
-#pragma omp parallel for
+#pragma omp parallel for private(i)
 	for (i = 1; i <= initStackSize; i++)
 	{
 		pushToStack(i * i);
@@ -153,7 +146,7 @@ int main(int argc, char **argv)
 	//
 	// 2. Remove multiple items from the stack. This loop needs to be parallelised as part of the coursework.
 	//
-#pragma omp parallel for
+#pragma omp parallel for private(i)
 	for (i = 1; i <= numToPop; i++)
 	{
 		popFromStack();
