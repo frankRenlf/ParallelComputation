@@ -137,7 +137,10 @@ int main(int argc, char **argv)
 #pragma omp parallel for private(i)
 	for (i = 1; i <= initStackSize; i++)
 	{
-		pushToStack(i * i);
+#pragma omp critical(inner)
+		{
+			pushToStack(i * i);
+		}
 	}
 
 	// Display the initial stack. The argument '0' means this is the initial stack.
@@ -149,7 +152,10 @@ int main(int argc, char **argv)
 #pragma omp parallel for private(i)
 	for (i = 1; i <= numToPop; i++)
 	{
-		popFromStack();
+#pragma omp critical(inner)
+		{
+			popFromStack();
+		}
 	}
 
 	//
