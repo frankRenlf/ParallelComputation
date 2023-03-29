@@ -105,14 +105,6 @@ int main(int argc, char **argv)
 		//
 
 		// Upper boundary.
-		// if( rowBlock>0   ) MPI_ISend( &grid[_index(        1,1)], local_L, MPI_FLOAT, rank-p, 0, MPI_COMM_WORLD );
-		// if( rowBlock<p-1 ) MPI_IRecv( &grid[_index(local_L+1,1)], local_L, MPI_FLOAT, rank+p, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE );
-
-		// Lower boundary.
-		// if( rowBlock<p-1 ) MPI_ISend( &grid[_index(local_L,1)], local_L, MPI_FLOAT, rank+p, 0, MPI_COMM_WORLD );
-		// if( rowBlock>0   ) MPI_IRecv( &grid[_index(      0,1)], local_L, MPI_FLOAT, rank-p, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE );
-		// Upper boundary.
-		// Upper boundary.
 		MPI_Request request_send_upper, request_recv_upper;
 		if (rowBlock > 0)
 		{
