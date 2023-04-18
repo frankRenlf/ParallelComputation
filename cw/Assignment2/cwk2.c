@@ -73,8 +73,32 @@ int main(int argc, char **argv)
 	// EXCEPT calls to the routines in cwk2_extra.h which MUST be called as provided.
 	//
 
-	MPI_Bcast(&pixelsPerProc, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&maxValue, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	int levOfTree = 0;
+
+	if (numProcs && ((numProcs & (numProcs - 1)) != 0))
+	{
+		MPI_Bcast(&pixelsPerProc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		MPI_Bcast(&maxValue, 1, MPI_INT, 0, MPI_COMM_WORLD);				
+	}
+	else
+	{
+		while ((1 << levOfTree) < numProcs)
+		{			
+			if (rank<(1<<levOfTree))
+			{
+				MPI_Send(&pixelsPerProc, 1, MPI_INT, rank+(1<<levOfTree), 0, MPI_COMM_WORLD);
+				MPI_Send(&maxValue, 1, MPI_INT, rank+(1<<levOfTree), 0, MPI_COMM_WORLD);				
+			}			
+			else if(rank>=(1<<levOfTree) && rank<(1<<(levOfTree+1)))
+			{
+				MPI_Recv(&pixelsPerProc, 1, MPI_INT, rank-(1<<levOfTree), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE );
+				MPI_Recv(&maxValue, 1, MPI_INT, rank-(1<<levOfTree), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE );				
+			}
+			levOfTree++;
+			MPI_Barrier(MPI_COMM_WORLD);			
+		}
+		
+	}
 
 	int *localImagePart = (int *)malloc(pixelsPerProc * sizeof(int));	
 
@@ -84,52 +108,19 @@ int main(int argc, char **argv)
 
 	int *localHist = (int *)malloc((maxValue + 1) * sizeof(int));	
 
-	for (int i = 0; i < maxValue + 1; i++)
+	for (i = 0; i < maxValue + 1; i++)
 		localHist[i] = 0;
-	for (int i = 0; i < pixelsPerProc; i++)
+
+	for (i = 0; i < pixelsPerProc; i++)
 	{		
 		if (localImagePart[i] >= 0)
 			localHist[localImagePart[i]]++;
-	}
-		
-	int *localHist2 = (int *)malloc((maxValue + 1) * sizeof(int));
-
-	MPI_Bcast(&numProcs, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	if (numProcs && ((numProcs&(numProcs-1))==0))
-	{
-
-		int curNumProcs = numProcs;
-		while (curNumProcs > 1)
-		{
-			if (rank < curNumProcs / 2)
-			{
-				MPI_Recv(localHist2, maxValue + 1, MPI_INT, rank + (curNumProcs / 2), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-				for (int i = 0; i < maxValue + 1; i++)
-				{					
-					localHist[i] = localHist[i] + localHist2[i];					
-				}				
-			}
-			else if (rank >= curNumProcs / 2 && rank < curNumProcs)
-			{
-				MPI_Send(localHist, maxValue + 1, MPI_INT, rank - (curNumProcs / 2), 0, MPI_COMM_WORLD);
-			}			
-			curNumProcs = curNumProcs / 2;			
-		}
-		if (rank == 0)
-		{
-			for (int i = 0; i < (maxValue + 1); i++)
-			{
-				combinedHist[i] = localHist[i];
-			}
-		}
-	}
-	else
-	{
-		MPI_Reduce(localHist, combinedHist, maxValue + 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-	}
+	}			
+	
+	MPI_Reduce(localHist, combinedHist, maxValue + 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+	
 	free(localImagePart);
-	free(localHist);
-	free(localHist2);
+	free(localHist);	
 	if (rank == 0)
 	{
 		// Time for the parallel computation.
@@ -148,8 +139,8 @@ int main(int argc, char **argv)
 				checkHist[image[i]]++;
 
 		// Display the histgram.
-		for (i = 0; i < maxValue + 1; i++)
-			printf("Greyscale value %i:\tCount %i\t(check: %i)\n", i, combinedHist[i], checkHist[i]);
+		// for (i = 0; i < maxValue + 1; i++)
+		// 	printf("Greyscale value %i:\tCount %i\t(check: %i)\n", i, combinedHist[i], checkHist[i]);
 
 		free(checkHist);
 	}
