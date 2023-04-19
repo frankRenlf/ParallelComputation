@@ -19,8 +19,19 @@ No. Process:                        Mean time (average of 3 runs)           Para
 8																		0.0253558			                          1.67
 
 Architecture that the timing runs were performed on:
-With two processes, the performance gain is not substantial. However, with four processes, the performance gain is noticeable. Nevertheless, as the number of processes increases further, the performance gain becomes increasingly marginal.
+Device:
+ - Device Type: CPU
+ - Device name: Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz
+ - Device version: OpenCL 2.1 (Build 0)
+ - Driver version: 18.1.0.0920
+ - Extensions: cl_khr_icd cl_khr_global_int32_base_atomics cl_khr_global_int32_extended_atomics cl_khr_local_int32_base_atomics cl_khr_local_int32_extended_atomics cl_khr_byte_addressable_store cl_khr_depth_images cl_khr_3d_image_writes cl_intel_exec_by_local_thread cl_khr_spir cl_khr_fp64 cl_khr_image2d_from_buffer cl_intel_vec_len_hint 
+ - 2 compute unit(s)
+ - Max. group work size = 8192
+ - Address width is 64 bits
+
 
 A brief interpretation of these results (2-3 sentences should be enough):
-When starting using mutliply processes, the initial job may take a lot of resources, then with the increament of processes, more processes will
+With two processes, the performance gain is not substantial. However, with four processes, the performance gain is noticeable. 
+Nevertheless, as the number of processes increases further, the performance gain becomes increasingly marginal.
+The reason is When starting using mutliply processes, the initial job may take a lot of resources, then with the increament of processes, more processes will
 help the finish the job. But create new process also need resources, thus the speed-up isn't significantly.
