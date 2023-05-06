@@ -76,13 +76,9 @@ int main(int argc, char **argv)
     // but you are free to make changes elsewhere in this code.
 
     // Create buffers for the matrix, vector, and solution on the device.
-    cl_mem matrix = clCreateBuffer(context, CL_MEM_READ_ONLY, N * N * sizeof(float), hostMatrix, &status);
-    cl_mem vector = clCreateBuffer(context, CL_MEM_READ_ONLY, N * sizeof(float), hostVector, &status);
+    cl_mem matrix = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, N * N * sizeof(float), hostMatrix, &status);
+    cl_mem vector = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, N * sizeof(float), hostVector, &status);
     cl_mem solution = clCreateBuffer(context, CL_MEM_WRITE_ONLY, N * sizeof(float), NULL, &status);
-
-    // Write the matrix and vector to the device.
-    // status = clEnqueueWriteBuffer(queue, matrix, CL_TRUE, 0, N * N * sizeof(float), hostMatrix, 0, NULL, NULL);
-    // status = clEnqueueWriteBuffer(queue, vector, CL_TRUE, 0, N * sizeof(float), hostVector, 0, NULL, NULL);
 
     // Compile the kernel.
     cl_kernel kernel = compileKernelFromFile("cwk3.cl", "matrixVectorMul", context, device);
@@ -91,7 +87,7 @@ int main(int argc, char **argv)
     status = clSetKernelArg(kernel, 0, sizeof(cl_mem), &matrix);
     status = clSetKernelArg(kernel, 1, sizeof(cl_mem), &vector);
     status = clSetKernelArg(kernel, 2, sizeof(cl_mem), &solution);
-    // status = clSetKernelArg(kernel, 3, sizeof(int), &N);
+    status = clSetKernelArg(kernel, 3, sizeof(int), &N);
     if (status != CL_SUCCESS)
     {
         printf("Error setting kernel arguments: %d\n", status);
@@ -99,11 +95,11 @@ int main(int argc, char **argv)
     }
 
     // Define the global and local work sizes.
-    size_t globalWorkSize[1] = {N};
-    size_t localWorkSize[1] = {256}; // 256 is the maximum local work size for some GPUs.
+    size_t globalWorkSize[2] = {N, N};
+    size_t workGroupSize[2] = {8, 16}; // 256 is the maximum local work size for some GPUs.
 
     // Execute the kernel.
-    status = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, globalWorkSize, localWorkSize, 0, NULL, NULL);
+    status = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, globalWorkSize, workGroupSize, 0, NULL, NULL);
     // if (status != CL_SUCCESS)
     // {
     //     printf("Error enqueueing kernel: %d\n", status);
@@ -114,6 +110,9 @@ int main(int argc, char **argv)
     clFinish(queue);
 
     // Read the solution vector back from the device.
+    // Write the matrix and vector to the device.
+    status = clEnqueueWriteBuffer(queue, matrix, CL_TRUE, 0, N * N * sizeof(float), hostMatrix, 0, NULL, NULL);
+    status = clEnqueueWriteBuffer(queue, vector, CL_TRUE, 0, N * sizeof(float), hostVector, 0, NULL, NULL);
     status = clEnqueueReadBuffer(queue, solution, CL_TRUE, 0, N * sizeof(float), hostSolution, 0, NULL, NULL);
     if (status != CL_SUCCESS)
     {
