@@ -111,8 +111,8 @@ int main(int argc, char **argv)
 
     // Read the solution vector back from the device.
     // Write the matrix and vector to the device.
-    status = clEnqueueWriteBuffer(queue, matrix, CL_TRUE, 0, N * N * sizeof(float), hostMatrix, 0, NULL, NULL);
-    status = clEnqueueWriteBuffer(queue, vector, CL_TRUE, 0, N * sizeof(float), hostVector, 0, NULL, NULL);
+    // status = clEnqueueWriteBuffer(queue, matrix, CL_TRUE, 0, N * N * sizeof(float), hostMatrix, 0, NULL, NULL);
+    // status = clEnqueueWriteBuffer(queue, vector, CL_TRUE, 0, N * sizeof(float), hostVector, 0, NULL, NULL);
     status = clEnqueueReadBuffer(queue, solution, CL_TRUE, 0, N * sizeof(float), hostSolution, 0, NULL, NULL);
     if (status != CL_SUCCESS)
     {
@@ -132,6 +132,7 @@ int main(int argc, char **argv)
     clReleaseMemObject(vector);
     clReleaseMemObject(solution);
 
+    clReleaseKernel(kernel);
     clReleaseCommandQueue(queue);
     clReleaseContext(context);
 
