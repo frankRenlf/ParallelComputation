@@ -106,9 +106,6 @@ int main(int argc, char **argv)
     //     exit(-1);
     // }
 
-    // Wait for the kernel to finish executing.
-    clFinish(queue);
-
     // Read the solution vector back from the device.
     // Write the matrix and vector to the device.
     // status = clEnqueueWriteBuffer(queue, matrix, CL_TRUE, 0, N * N * sizeof(float), hostMatrix, 0, NULL, NULL);
